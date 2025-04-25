@@ -1,13 +1,13 @@
 {
   "DS-CO": 1,
-  "DC-CO": 0.9,
-  "DS-PR": 0.9,
-  "DC-PR": 0.87,
-  "DS-ST": 0.91,
-  "DC-ST": 0.88,
-  "DS-SST": 0.93,
-  "DC-SST": 0.92,
-  "DS-STG": 0.93,
-  "DC-STG": 0.88,
+  "DC-CO": 0.5,
+  "DS-PR": 1,
+  "DC-PR": 0.5,
+  "DS-ST": 0.6,
+  "DC-ST": 0.5,
+  "DS-SST": 1,
+  "DC-SST": 0.5,
+  "DS-STG": 1,
+  "DC-STG": 0.5,
   "DS-ID": 1
 }

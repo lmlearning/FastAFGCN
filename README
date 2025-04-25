@@ -1,0 +1,111 @@
+README for FastAFGCN Solver
+
+========================= Overview
+
+This package contains a Python script (solver.py) for checking argument acceptability in abstract argumentation frameworks (AFs) and a Bash wrapper script (solver.sh) to call it using a specific command-line interface (compatible with ICCMA standards).
+
+The solver.py script is designed to be memory-lean. It first computes the grounded extension efficiently. If the target argument is not in the grounded extension, it uses pre-trained ONNX models (Graph Neural Networks) combined with task-specific thresholds to determine the acceptability for other semantics (Complete, Preferred, Stable, Semi-stable, Ideal).
+
+========================= How to Use
+
+The primary way to use the solver is through the solver.sh script. Make sure the wrapper script has execute permissions:
+
+chmod +x solver.sh
+
+The basic command structure is:
+
+./solver.sh -p <task> -f <input_file> -a <argument_id> 
+
+Where:
+-p <task>:         Specifies the computational task (see Supported Tasks below). Required.
+-f <input_file>:   Path to the argumentation framework file in .apx format. Required.
+-a <argument_id>:  The ID (number) of the argument to check acceptability for (1-based index). Required for Decision tasks (DC/DS).
+
+Example:
+To check if argument '5' is skeptically accepted under Preferred semantics in the file 'example.apx':
+
+./solver.sh -p DS-PR -f example.af -a 5
+
+To list supported tasks:
+
+./solver.sh --problems
+
+
+========================= Supported Tasks
+
+The solver supports the following decision (DC/DS) tasks:
+
+  * DC-CO: Decide Credulously Complete
+  * DS-PR: Decide Skeptically Preferred
+  * DC-ST: Decide Credulously Stable
+  * DS-ST: Decide Skeptically Stable
+  * DC-SST: Decide Credulously Semi-stable
+  * DS-SST: Decide Skeptically Semi-stable
+  * DC-ID: Decide Credulously Ideal
+
+Note: Grounded semantics (DC-GR / DS-GR) are implicitly handled. The script first calculates the grounded extension. If the target argument is in the grounded extension, it is accepted under any semantics that contain the grounded extension (which includes all supported semantics). If the task specified were GR, the script would correctly identify this. For other tasks, this serves as an initial check before potentially invoking the ONNX model.
+
+Enumeration (SE/EE) and dynamic tasks are NOT supported.
+
+========================= Input Format
+
+The script expects the input argumentation framework file to be in the .af format, which is similar to DIMACS. The format is:
+
+1.  Optional comment lines starting with '#'.
+2.  A line p af N where N is the total number of arguments.
+3.  Lines U V representing an attack from argument U to argument V. Arguments are expected to be numbered from 1 to N.
+
+Example (example.af):
+
+p af 5
+#1
+#2
+#3
+#4
+#5
+1 2
+2 3
+3 4
+4 5
+5 2
+
+========================= Output
+
+The script prints either "YES" or "NO" to standard output, indicating whether the specified argument (-a <argument_id>) satisfies the acceptance criteria for the given task (-p <task>).
+
+In case of errors (e.g., missing file, unsupported task) or timeouts/interruptions, the script aims to output "NO".
+
+========================= Setup for a New Environment
+
+To run the solver in a new environment, you need the following:
+
+1.  Python 3: The script requires Python 3. The wrapper specifically calls python3.
+
+2.  Python Libraries: Install the required Python packages using pip:
+
+    pip install numpy onnxruntime torch
+
+      * numpy: For numerical operations.
+      * onnxruntime: To run the ONNX models.
+      * torch: Used by solver.py primarily to generate initial node features before the ONNX call.
+
+3.  Required Files: Ensure the following files are present in the same directory:
+
+      * solver.sh (the Bash wrapper script)
+
+      * solver.py (the Python solver script)
+
+      * ONNX Model Files: One .onnx file for each supported task (e.g., DC-CO_int8.onnx, DS-PR_int8.onnx, DC-ST_int8.onnx, etc.). The script expects filenames in the format <task>_int8.onnx.
+
+      * thresholds.json (Optional): A JSON file mapping tasks to specific decision thresholds. If not present, or if a task is missing, a default threshold of 0.5 is used. Example format:
+
+        {
+        "DC-CO": 0.55,
+        "DS-PR": 0.48
+        }
+
+4.  Permissions: Grant execute permissions to the wrapper script:
+
+    chmod +x solver.sh
+
+With these dependencies installed and files in place, you should be able to run the solver using the solver.sh script as described above.
