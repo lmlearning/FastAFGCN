@@ -1,4 +1,4 @@
-# FastAFGCN
+# FastAFGCN: Efficient ONNX Argumentation Solver
 
 **Quantized graph-neural-network inference for approximate abstract argumentation.** FastAFGCN combines a grounded-extension check with ONNX model inference to answer argument-acceptance queries.
 
